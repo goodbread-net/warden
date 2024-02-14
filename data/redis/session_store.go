@@ -42,3 +42,19 @@ func (s *SessionStore) Find(sessionID string) (string, error) {
 	}
 	return userID, nil
 }
+
+func (s *SessionStore) Revoke(sessionID string) error {
+	ctx := context.TODO()
+	key := s.Namespace + sessionID
+
+	// Retrieve the user ID using the session ID and delete it from the user's set.
+	// It's safe to ignore the error here because the key may not exist or will be
+	// removed when its TTL expires.
+	if userID, err := s.Client.Get(ctx, key).Result(); err == nil {
+		s.Client.SRem(ctx, s.Namespace+userID, sessionID)
+	}
+
+	// Now delete the session key.
+	_, err := s.Client.Del(ctx, key).Result()
+	return err
+}

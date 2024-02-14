@@ -50,3 +50,10 @@ func UnauthorizedError(message string) *ErrorResponse {
 		Error:  message,
 	}
 }
+
+func InternalServerError(message string) *ErrorResponse {
+	return &ErrorResponse{
+		Status: http.StatusInternalServerError,
+		Error:  message,
+	}
+}

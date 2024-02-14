@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/matthiase/warden/data/memory"
 	"github.com/matthiase/warden/data/postgres"
 	"github.com/matthiase/warden/models"
 )
@@ -12,13 +11,10 @@ import (
 type UserStore interface {
 	Create(firstName string, lastName string, email string) (*models.User, error)
 	Find(id string) (*models.User, error)
+	FindByEmail(email string) (*models.User, error)
 }
 
 func NewUserStore(client sqlx.Ext) (UserStore, error) {
-	if client == nil {
-		return memory.NewUserStore(), nil
-	}
-
 	switch client.DriverName() {
 	case "postgres":
 		return &postgres.UserStore{Ext: client}, nil

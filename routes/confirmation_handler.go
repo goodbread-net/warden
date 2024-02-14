@@ -10,14 +10,14 @@ import (
 	"github.com/matthiase/warden/session"
 )
 
-type ConfirmUserRequest struct {
+type ConfirmationRequest struct {
 	Passcode string `json:"passcode"`
 }
 
-func confirmUser(w http.ResponseWriter, r *http.Request) {
+func confirmationHandler(w http.ResponseWriter, r *http.Request) {
 	// Get the user-provided passcode from the request body and use it to
 	// to look up the associated user id.
-	var data ConfirmUserRequest
+	var data ConfirmationRequest
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		BadRequestError(err.Error()).Render(w, r)
 		return
@@ -120,7 +120,4 @@ func confirmUser(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 		Expires:  time.Now().UTC().Add(-1 * time.Second),
 	})
-
-	// Also return the verification token in the response body?
-
 }

@@ -8,24 +8,18 @@ import (
 	"github.com/matthiase/warden/verification"
 )
 
-type CreateUserRequest struct {
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Email     string `json:"email"`
+type AuthenticationRequest struct {
+	Email string `json:"email"`
 }
 
-func createUser(w http.ResponseWriter, r *http.Request) {
-	var data CreateUserRequest
+func loginHandler(w http.ResponseWriter, r *http.Request) {
+	var data AuthenticationRequest
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
 		panic(err)
 	}
 
-	// TODO: validate the email address and name
-
-	// TODO: ensure the email address is not already registered
-
-	user, err := app.UserStore.Create(data.FirstName, data.LastName, data.Email)
+	user, err := app.UserStore.FindByEmail(data.Email)
 	if err != nil {
 		panic(err)
 	}

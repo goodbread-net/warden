@@ -14,7 +14,7 @@ type GetProfileResponse struct {
 	AccessToken string `json:"access_token"`
 }
 
-func getCurrentUser(w http.ResponseWriter, r *http.Request) {
+func authenticationHandler(w http.ResponseWriter, r *http.Request) {
 	var identityToken string
 
 	if identityTokenCookie, err := r.Cookie(app.Config.Session.Name + "_it"); err == nil {

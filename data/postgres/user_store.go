@@ -10,20 +10,6 @@ type UserStore struct {
 	sqlx.Ext
 }
 
-func (db *UserStore) Find(id string) (*models.User, error) {
-	sql := `
-		SELECT id, first_name, last_name, email
-		FROM users
-		WHERE id = $1
-	`
-
-	user := models.User{}
-	if err := sqlx.Get(db, &user, sql, id); err != nil {
-		return nil, err
-	}
-	return &user, nil
-}
-
 func (db *UserStore) Create(firstName string, lastName string, email string) (*models.User, error) {
 	sql := `
 		INSERT INTO users (id, first_name, last_name, email)
@@ -45,5 +31,33 @@ func (db *UserStore) Create(firstName string, lastName string, email string) (*m
 		return nil, err
 	}
 
+	return &user, nil
+}
+
+func (db *UserStore) Find(id string) (*models.User, error) {
+	sql := `
+		SELECT id, first_name, last_name, email
+		FROM users
+		WHERE id = $1
+	`
+
+	user := models.User{}
+	if err := sqlx.Get(db, &user, sql, id); err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (db *UserStore) FindByEmail(email string) (*models.User, error) {
+	sql := `
+		SELECT id, first_name, last_name, email
+		FROM users
+		WHERE email = $1
+	`
+
+	user := models.User{}
+	if err := sqlx.Get(db, &user, sql, email); err != nil {
+		return nil, err
+	}
 	return &user, nil
 }

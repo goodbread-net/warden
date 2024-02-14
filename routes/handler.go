@@ -42,11 +42,17 @@ func NewHandler(application *warden.Application) http.Handler {
 	})
 	router.Use(cors.Handler)
 
-	router.Get("/healthcheck", Healthcheck)
-	router.Get("/sessions/me", getCurrentUser)
-	router.Route("/registration", func(r chi.Router) {
-		r.Post("/start", createUser)
-		r.Post("/confirm", confirmUser)
+	router.Get("/healthcheck", healthcheckHandler)
+	router.Route("/api/v1", func(r chi.Router) {
+		r.Route("/users", func(r chi.Router) {
+			r.Post("/register", registrationHandler)
+			r.Post("/login", loginHandler)
+			r.Post("/logout", logoutHandler)
+		})
+		r.Route("/sessions", func(r chi.Router) {
+			r.Post("/confirm", confirmationHandler)
+			r.Get("/authenticate", authenticationHandler)
+		})
 	})
 
 	return router
