@@ -27,7 +27,7 @@ func NewHandler(application *warden.Application) http.Handler {
 	router.MethodNotAllowed(methodNotAllowedHandler)
 	router.NotFound(notFoundHandler)
 
-	allowedOrigins := []string{"*"}
+	allowedOrigins := []string{"http://localhost:3000", "https://goodbread.vercel.app", "https://preview.goodbread.net"}
 	if len(allowedOrigins) == 0 {
 		log.Fatal("HTTP server unable to start - expected ALLOWED_ORIGINS")
 	}
