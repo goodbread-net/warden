@@ -29,7 +29,7 @@ func main() {
 		log.Fatalf("Could not set up application: %v", err)
 	}
 
-	addr := fmt.Sprintf("%s:%d", "0.0.0.0", cfg.Server.Port)
+	addr := fmt.Sprintf(":%d", cfg.Server.Port)
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		log.Fatalf("Error occurred: %s", err.Error())
