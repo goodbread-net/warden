@@ -47,7 +47,7 @@ func ReadEnv() *Config {
 	cfg.Application = lookupString("APPLICATION_NAME", "Warden")
 	cfg.Environment = lookupString("ENVIRONMENT", "development")
 	cfg.Server.Host = lookupString("SERVER_HOST", "localhost")
-	cfg.Server.Port = lookupInt("SERVER_PORT", 5000)
+	cfg.Server.Port = lookupInt("PORT", 5000)
 	cfg.Server.Secret = os.Getenv("SERVER_SECRET")
 	cfg.Database.URL = parseURL("DATABASE_URL")
 	cfg.Redis.URL = parseURL("REDIS_URL")

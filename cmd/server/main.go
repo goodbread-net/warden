@@ -4,11 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"net"
 	"net/http"
 	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -30,26 +27,28 @@ func main() {
 	}
 
 	addr := fmt.Sprintf(":%d", cfg.Server.Port)
-	listener, err := net.Listen("tcp", addr)
-	if err != nil {
-		log.Fatalf("Error occurred: %s", err.Error())
-	}
+	//listener, err := net.Listen("tcp", addr)
+	//if err != nil {
+	//	log.Fatalf("Error occurred: %s", err.Error())
+	//}
 
-	httpHandler := routes.NewHandler(app)
-	server := &http.Server{
-		Handler: httpHandler,
-	}
-	go func() {
-		server.Serve(listener)
-	}()
+	//httpHandler := routes.NewHandler(app)
+	//server := &http.Server{
+	//	Handler: httpHandler,
+	//}
+	//go func() {
+	//	server.Serve(listener)
+	//}()
 
-	defer Stop(server)
+	//defer Stop(server)
+
+	http.ListenAndServe(addr, routes.NewHandler(app))
 	log.Printf("Started server on %s", addr)
 
-	ch := make(chan os.Signal, 1)
-	signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM)
-	log.Println(fmt.Sprint(<-ch))
-	log.Println("Stopping API server")
+	//ch := make(chan os.Signal, 1)
+	//signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM)
+	//log.Println(fmt.Sprint(<-ch))
+	//log.Println("Stopping API server")
 }
 
 func Stop(server *http.Server) {
