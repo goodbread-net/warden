@@ -44,7 +44,7 @@ func NewIdentityClaims(sessionID string, user *models.User, cfg *config.Config) 
 			NotBefore: issuedAt,
 			Issuer:    cfg.Server.Host,
 			Subject:   user.ID,
-			Audience:  []string{"somebody_else"},
+			Audience:  []string{"nexus"},
 		},
 	}
 }

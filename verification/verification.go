@@ -39,7 +39,7 @@ func NewVerificationClaims(userID string, cfg *config.Config) *VerificationClaim
 			NotBefore: issuedAt,
 			Issuer:    issuer,
 			Subject:   userID,
-			Audience:  []string{"somebody_else"},
+			Audience:  []string{"nexus"},
 		},
 	}
 }

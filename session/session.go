@@ -39,7 +39,7 @@ func NewSessionClaims(sessionID string, cfg *config.Config) *SessionClaims {
 			NotBefore: issuedAt,
 			Issuer:    issuer,
 			Subject:   sessionID,
-			Audience:  []string{"somebody_else"},
+			Audience:  []string{"nexus"},
 		},
 	}
 }
