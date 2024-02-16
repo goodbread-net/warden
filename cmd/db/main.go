@@ -13,8 +13,7 @@ func main() {
 	command := os.Args[1]
 
 	if err := godotenv.Load(); err != nil {
-		fmt.Printf("Error loading .env file: %v\n", err)
-		os.Exit(1)
+		fmt.Println("No .env file found")
 	}
 
 	cfg := config.ReadEnv()
