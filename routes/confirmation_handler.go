@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"time"
+	"strings"
 
 	"github.com/matthiase/warden/identity"
 	"github.com/matthiase/warden/session"
@@ -12,6 +12,11 @@ import (
 
 type ConfirmationRequest struct {
 	Passcode string `json:"passcode"`
+}
+
+type ConfirmationResponse struct {
+	IdentityToken string `json:"identity_token"`
+	SessionToken  string `json:"session_token"`
 }
 
 func confirmationHandler(w http.ResponseWriter, r *http.Request) {
@@ -34,19 +39,18 @@ func confirmationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse the value of the verification token cookie to get the user id.
-	// If the user id in the verification token matches the expected user id,
-	// then the user has successfully confirmed their identity.
-	verificationToken, err := r.Cookie(app.Config.Session.Name + "_vt")
-	if err != nil {
-		UnauthorizedError("Missing verification token").Render(w, r)
+	// Get the verification token from the request header
+	authorizationHeader := r.Header.Get("Authorization")
+	if authorizationHeader == "" {
+		UnauthorizedError("Missing authorization header").Render(w, r)
 		return
 	}
 
-	// Parse the verification token to get the user id
-	verificationClaims, err := identity.Parse(verificationToken.Value, []byte(app.Config.Server.Secret))
+	// Parse the verification token and ensure that it matches the user id
+	verificationToken := strings.Split(authorizationHeader, " ")[1]
+	verificationClaims, err := identity.Parse(verificationToken, []byte(app.Config.Server.Secret))
 	if err != nil {
-		UnauthorizedError("Invalid authentication token").Render(w, r)
+		UnauthorizedError("Invalid verification token").Render(w, r)
 		return
 	}
 
@@ -83,16 +87,6 @@ func confirmationHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	http.SetCookie(w, &http.Cookie{
-		Name:     app.Config.Session.Name + "_st",
-		Value:    sessionToken,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   app.Config.Session.Secure,
-		SameSite: http.SameSiteLaxMode,
-		Expires:  time.Now().UTC().Add(time.Duration(app.Config.Session.MaxAge) * time.Second),
-	})
-
 	// The identity token will be used to authenticate requests
 	identityClaims := identity.NewIdentityClaims(sessionID, user, app.Config)
 	identityToken, err := identityClaims.Sign(secret)
@@ -100,45 +94,8 @@ func confirmationHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	if app.Config.Session.Secure {
-		http.SetCookie(w, &http.Cookie{
-			Name:     app.Config.Session.Name + "_it",
-			Value:    identityToken,
-			Path:     "/",
-			HttpOnly: true,
-			Secure:   true,
-			SameSite: http.SameSiteNoneMode,
-			Expires:  time.Now().UTC().Add(3600 * time.Second),
-		})
-
-		// Remove the verification token cookie
-		http.SetCookie(w, &http.Cookie{
-			Name:     app.Config.Session.Name + "_vt",
-			Value:    "",
-			Path:     "/",
-			HttpOnly: true,
-			Secure:   true,
-			SameSite: http.SameSiteNoneMode,
-			Expires:  time.Now().UTC().Add(-1 * time.Second),
-		})
-	} else {
-		http.SetCookie(w, &http.Cookie{
-			Name:     app.Config.Session.Name + "_it",
-			Value:    identityToken,
-			Path:     "/",
-			HttpOnly: true,
-			SameSite: http.SameSiteLaxMode,
-			Expires:  time.Now().UTC().Add(3600 * time.Second),
-		})
-
-		// Remove the verification token cookie
-		http.SetCookie(w, &http.Cookie{
-			Name:     app.Config.Session.Name + "_vt",
-			Value:    "",
-			Path:     "/",
-			HttpOnly: true,
-			SameSite: http.SameSiteLaxMode,
-			Expires:  time.Now().UTC().Add(-1 * time.Second),
-		})
-	}
+	json.NewEncoder(w).Encode(ConfirmationResponse{
+		IdentityToken: identityToken,
+		SessionToken:  sessionToken,
+	})
 }

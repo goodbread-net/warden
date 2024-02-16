@@ -3,7 +3,6 @@ package routes
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"github.com/matthiase/warden/verification"
 )
@@ -12,6 +11,10 @@ type RegistrationRequest struct {
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Email     string `json:"email"`
+}
+
+type RegistrationResponse struct {
+	VerificationToken string `json:"verification_token"`
 }
 
 func registrationHandler(w http.ResponseWriter, r *http.Request) {
@@ -49,24 +52,28 @@ func registrationHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	if app.Config.Session.Secure {
-		http.SetCookie(w, &http.Cookie{
-			Name:     app.Config.Session.Name + "_vt",
-			Value:    verificationToken,
-			Path:     "/",
-			HttpOnly: true,
-			Secure:   true,
-			SameSite: http.SameSiteNoneMode,
-			Expires:  time.Now().UTC().Add(300 * time.Second),
-		})
-	} else {
-		http.SetCookie(w, &http.Cookie{
-			Name:     app.Config.Session.Name + "_vt",
-			Value:    verificationToken,
-			Path:     "/",
-			HttpOnly: true,
-			SameSite: http.SameSiteLaxMode,
-			Expires:  time.Now().UTC().Add(300 * time.Second),
-		})
-	}
+	json.NewEncoder(w).Encode(RegistrationResponse{
+		VerificationToken: verificationToken,
+	})
+
+	//if app.Config.Session.Secure {
+	//	http.SetCookie(w, &http.Cookie{
+	//		Name:     app.Config.Session.Name + "_vt",
+	//		Value:    verificationToken,
+	//		Path:     "/",
+	//		HttpOnly: true,
+	//		Secure:   true,
+	//		SameSite: http.SameSiteNoneMode,
+	//		Expires:  time.Now().UTC().Add(300 * time.Second),
+	//	})
+	//} else {
+	//	http.SetCookie(w, &http.Cookie{
+	//		Name:     app.Config.Session.Name + "_vt",
+	//		Value:    verificationToken,
+	//		Path:     "/",
+	//		HttpOnly: true,
+	//		SameSite: http.SameSiteLaxMode,
+	//		Expires:  time.Now().UTC().Add(300 * time.Second),
+	//	})
+	//}
 }

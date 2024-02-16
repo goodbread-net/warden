@@ -42,8 +42,8 @@ func main() {
 
 	//defer Stop(server)
 
+	log.Printf("Starting server on %s", addr)
 	http.ListenAndServe(addr, routes.NewHandler(app))
-	log.Printf("Started server on %s", addr)
 
 	//ch := make(chan os.Signal, 1)
 	//signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM)
