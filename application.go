@@ -24,11 +24,13 @@ func NewApplication(cfg *config.Config) (*Application, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to Postgres: %w", err)
 	}
+	fmt.Println("Connected to Postgres")
 
 	redisClient, err := redis.Connect(cfg.Redis.URL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to Redis: %w", err)
 	}
+	fmt.Println("Connected to Redis")
 
 	userStore, err := data.NewUserStore(postgresClient)
 	if err != nil {
