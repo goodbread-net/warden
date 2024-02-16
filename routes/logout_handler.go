@@ -21,23 +21,42 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Clear the identity token and session token cookies
-	http.SetCookie(w, &http.Cookie{
-		Name:     app.Config.Session.Name + "_it",
-		Value:    "",
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   app.Config.Session.Secure,
-		SameSite: http.SameSiteStrictMode,
-		Expires:  time.Now().UTC().Add(-1 * time.Second),
-	})
+	if app.Config.Session.Secure {
+		http.SetCookie(w, &http.Cookie{
+			Name:     app.Config.Session.Name + "_it",
+			Value:    "",
+			Path:     "/",
+			HttpOnly: true,
+			Secure:   true,
+			SameSite: http.SameSiteNoneMode,
+			Expires:  time.Now().UTC().Add(-1 * time.Second),
+		})
+		http.SetCookie(w, &http.Cookie{
+			Name:     app.Config.Session.Name + "_st",
+			Value:    "",
+			Path:     "/",
+			HttpOnly: true,
+			Secure:   true,
+			SameSite: http.SameSiteNoneMode,
+			Expires:  time.Now().UTC().Add(-1 * time.Second),
+		})
 
-	http.SetCookie(w, &http.Cookie{
-		Name:     app.Config.Session.Name + "_st",
-		Value:    "",
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   app.Config.Session.Secure,
-		SameSite: http.SameSiteStrictMode,
-		Expires:  time.Now().UTC().Add(-1 * time.Second),
-	})
+	} else {
+		http.SetCookie(w, &http.Cookie{
+			Name:     app.Config.Session.Name + "_it",
+			Value:    "",
+			Path:     "/",
+			HttpOnly: true,
+			SameSite: http.SameSiteLaxMode,
+			Expires:  time.Now().UTC().Add(-1 * time.Second),
+		})
+		http.SetCookie(w, &http.Cookie{
+			Name:     app.Config.Session.Name + "_st",
+			Value:    "",
+			Path:     "/",
+			HttpOnly: true,
+			SameSite: http.SameSiteLaxMode,
+			Expires:  time.Now().UTC().Add(-1 * time.Second),
+		})
+	}
 }

@@ -61,15 +61,26 @@ func authenticationHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Set the identity token cookie
-		http.SetCookie(w, &http.Cookie{
-			Name:     app.Config.Session.Name + "_it",
-			Value:    identityToken,
-			Path:     "/",
-			HttpOnly: true,
-			Secure:   app.Config.Session.Secure,
-			SameSite: http.SameSiteLaxMode,
-			Expires:  time.Now().UTC().Add(3600 * time.Second),
-		})
+		if app.Config.Session.Secure {
+			http.SetCookie(w, &http.Cookie{
+				Name:     app.Config.Session.Name + "_it",
+				Value:    identityToken,
+				Path:     "/",
+				HttpOnly: true,
+				Secure:   true,
+				SameSite: http.SameSiteLaxMode,
+				Expires:  time.Now().UTC().Add(3600 * time.Second),
+			})
+		} else {
+			http.SetCookie(w, &http.Cookie{
+				Name:     app.Config.Session.Name + "_it",
+				Value:    identityToken,
+				Path:     "/",
+				HttpOnly: true,
+				SameSite: http.SameSiteLaxMode,
+				Expires:  time.Now().UTC().Add(3600 * time.Second),
+			})
+		}
 	}
 
 	// At this point, the identity token has either been retrieved from the cookie or
