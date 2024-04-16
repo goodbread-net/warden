@@ -3,17 +3,20 @@ package routes
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"github.com/matthiase/warden/verification"
 )
 
-type AuthenticationRequest struct {
+type LoginRequest struct {
 	Email string `json:"email"`
 }
 
+type LoginResponse struct {
+	VerificationToken string `json:"verification_token"`
+}
+
 func loginHandler(w http.ResponseWriter, r *http.Request) {
-	var data AuthenticationRequest
+	var data LoginRequest
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
 		panic(err)
@@ -43,24 +46,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	if app.Config.Session.Secure {
-		http.SetCookie(w, &http.Cookie{
-			Name:     app.Config.Session.Name + "_vt",
-			Value:    verificationToken,
-			Path:     "/",
-			HttpOnly: true,
-			Secure:   true,
-			SameSite: http.SameSiteNoneMode,
-			Expires:  time.Now().UTC().Add(300 * time.Second),
-		})
-	} else {
-		http.SetCookie(w, &http.Cookie{
-			Name:     app.Config.Session.Name + "_vt",
-			Value:    verificationToken,
-			Path:     "/",
-			HttpOnly: true,
-			SameSite: http.SameSiteLaxMode,
-			Expires:  time.Now().UTC().Add(300 * time.Second),
-		})
-	}
+	json.NewEncoder(w).Encode(LoginResponse{
+		VerificationToken: verificationToken,
+	})
 }

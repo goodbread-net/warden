@@ -1,7 +1,10 @@
 package postgres
 
 import (
+	"errors"
+
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 	"github.com/matthiase/warden/models"
 	"github.com/segmentio/ksuid"
 )
@@ -19,9 +22,18 @@ func (db *UserStore) Create(firstName string, lastName string, email string) (*m
 
 	uid := ksuid.New()
 	result, err := db.Queryx(sql, uid.String(), firstName, lastName, email)
+
 	if err != nil {
-		return nil, err
+
+		if err, ok := err.(*pq.Error); ok && err.Code == "23505" {
+			return nil, errors.New(models.ErrUserDuplicateEmail)
+		}
 	}
+
+	//if err, ok := err.(*pg.Error); ok && err.Code == "23505" {
+	//	return nil, models.ErrDuplicateEmail
+	//	return nil, err
+	//}
 
 	defer result.Close()
 	result.Next()

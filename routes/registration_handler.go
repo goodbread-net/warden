@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/matthiase/warden/models"
 	"github.com/matthiase/warden/verification"
 )
 
@@ -14,6 +15,7 @@ type RegistrationRequest struct {
 }
 
 type RegistrationResponse struct {
+	User              *User  `json:"user"`
 	VerificationToken string `json:"verification_token"`
 }
 
@@ -26,11 +28,14 @@ func registrationHandler(w http.ResponseWriter, r *http.Request) {
 
 	// TODO: validate the email address and name
 
-	// TODO: ensure the email address is not already registered
-
 	user, err := app.UserStore.Create(data.FirstName, data.LastName, data.Email)
 	if err != nil {
-		panic(err)
+		if err.Error() == models.ErrUserDuplicateEmail {
+			ConflictError("Email address is already registered").Render(w, r)
+			return
+		} else {
+			panic(err)
+		}
 	}
 
 	passcode, err := app.PasscodeStore.Create(user.ID)
@@ -53,27 +58,12 @@ func registrationHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(RegistrationResponse{
+		User: &User{
+			ID:        user.ID,
+			FirstName: user.FirstName,
+			LastName:  user.LastName,
+			Email:     user.Email,
+		},
 		VerificationToken: verificationToken,
 	})
-
-	//if app.Config.Session.Secure {
-	//	http.SetCookie(w, &http.Cookie{
-	//		Name:     app.Config.Session.Name + "_vt",
-	//		Value:    verificationToken,
-	//		Path:     "/",
-	//		HttpOnly: true,
-	//		Secure:   true,
-	//		SameSite: http.SameSiteNoneMode,
-	//		Expires:  time.Now().UTC().Add(300 * time.Second),
-	//	})
-	//} else {
-	//	http.SetCookie(w, &http.Cookie{
-	//		Name:     app.Config.Session.Name + "_vt",
-	//		Value:    verificationToken,
-	//		Path:     "/",
-	//		HttpOnly: true,
-	//		SameSite: http.SameSiteLaxMode,
-	//		Expires:  time.Now().UTC().Add(300 * time.Second),
-	//	})
-	//}
 }

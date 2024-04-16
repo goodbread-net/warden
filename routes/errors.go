@@ -30,6 +30,13 @@ func BadRequestError(message string) *ErrorResponse {
 	}
 }
 
+func ConflictError(message string) *ErrorResponse {
+	return &ErrorResponse{
+		Status: http.StatusConflict,
+		Error:  message,
+	}
+}
+
 func MethodNotAllowedError() *ErrorResponse {
 	return &ErrorResponse{
 		Status: http.StatusMethodNotAllowed,

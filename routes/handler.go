@@ -47,11 +47,12 @@ func NewHandler(application *warden.Application) http.Handler {
 		r.Route("/users", func(r chi.Router) {
 			r.Post("/register", registrationHandler)
 			r.Post("/login", loginHandler)
-			r.Post("/logout", logoutHandler)
 		})
 		r.Route("/sessions", func(r chi.Router) {
 			r.Post("/confirm", confirmationHandler)
 			r.Get("/authenticate", authenticationHandler)
+			r.Post("/refresh", refreshHandler)
+			r.Get("/profile", profileHandler)
 		})
 	})
 

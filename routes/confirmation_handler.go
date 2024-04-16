@@ -8,6 +8,7 @@ import (
 
 	"github.com/matthiase/warden/identity"
 	"github.com/matthiase/warden/session"
+	"github.com/matthiase/warden/verification"
 )
 
 type ConfirmationRequest struct {
@@ -15,6 +16,7 @@ type ConfirmationRequest struct {
 }
 
 type ConfirmationResponse struct {
+	User          *User  `json:"user"`
 	IdentityToken string `json:"identity_token"`
 	SessionToken  string `json:"session_token"`
 }
@@ -48,7 +50,7 @@ func confirmationHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Parse the verification token and ensure that it matches the user id
 	verificationToken := strings.Split(authorizationHeader, " ")[1]
-	verificationClaims, err := identity.Parse(verificationToken, []byte(app.Config.Server.Secret))
+	verificationClaims, err := verification.Parse(verificationToken, []byte(app.Config.Server.Secret))
 	if err != nil {
 		UnauthorizedError("Invalid verification token").Render(w, r)
 		return
@@ -95,6 +97,7 @@ func confirmationHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(ConfirmationResponse{
+		User:          &User{ID: user.ID},
 		IdentityToken: identityToken,
 		SessionToken:  sessionToken,
 	})

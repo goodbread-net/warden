@@ -2,19 +2,17 @@ package routes
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"strings"
 
 	"github.com/matthiase/warden/identity"
 )
 
-type AuthenticationResponse struct {
-	*User       `json:"user"`
-	AccessToken string `json:"access_token"`
+type ProfileResponse struct {
+	User *User `json:"user"`
 }
 
-func authenticationHandler(w http.ResponseWriter, r *http.Request) {
+func profileHandler(w http.ResponseWriter, r *http.Request) {
 	// Get the authorization token from the request header
 	authorizationHeader := r.Header.Get("Authorization")
 	if authorizationHeader == "" {
@@ -30,9 +28,6 @@ func authenticationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get and log the expiration time of the token
-	log.Printf("Token expires at: %s", identityClaims.ExpiresAt)
-
 	// Get the user from the database
 	user, err := app.UserStore.Find(identityClaims.Subject)
 	if err != nil {
@@ -44,13 +39,12 @@ func authenticationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(AuthenticationResponse{
+	json.NewEncoder(w).Encode(ProfileResponse{
 		User: &User{
 			ID:        user.ID,
 			FirstName: user.FirstName,
 			LastName:  user.LastName,
 			Email:     user.Email,
 		},
-		AccessToken: identityToken,
 	})
 }
